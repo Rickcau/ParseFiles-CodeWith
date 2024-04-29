@@ -5,12 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApp_ParseData.Helpers
+namespace ConsoleApp_ParseData.Models
 {
-    [DelimitedRecord(",")]
+    [DelimitedRecord(","), IgnoreFirst(1)]
     public class SiebelRecords
     {
-        public string? CustomerID;
         public string? ProgramName;
         public string? PersonID;
         public string? ContactFirstName;
@@ -21,7 +20,7 @@ namespace ConsoleApp_ParseData.Helpers
         public string? ActivityCreatedBy;
 
         [FieldOptional]
-        [FieldQuotedAttribute(MultilineMode.AllowForBoth)]
+        [FieldQuoted(MultilineMode.AllowForBoth)]
         public string? ActivityDescription;
     }
 }

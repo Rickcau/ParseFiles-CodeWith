@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp_ParseData.Models
 {
+
     internal class GiactData
     {
         public string? UniqueID { get; set; }
