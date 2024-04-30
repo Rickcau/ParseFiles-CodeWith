@@ -21,7 +21,7 @@ namespace ConsoleApp_ParseData.Models
 
         [FieldOptional]
         [FieldQuoted(MultilineMode.AllowForBoth)]
-        public string? ActivityDescription;
+        public string? ActivityDescription; // This is the field that has multiline data and has the call notes data.  Technically this will not require the use of AI, but we can infact use it.  
     }
 }
 
