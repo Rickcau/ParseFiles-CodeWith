@@ -54,7 +54,7 @@ namespace ConsoleApp_ParseData.Helpers
             foreach (var recordSiebel in recordsSiebel)
             {
                 count++;
-                Console.WriteLine($@"Record# {count} ProgramName: {recordSiebel.ProgramName} PersonID: {recordSiebel.PersonID} ContactFirstName: {recordSiebel.ContactFirstName} ContactLastName: {recordSiebel.ContactLastName} ActivityCreatedDate: {recordSiebel.ActivityCreatedDate} ActivityType: {recordSiebel.ActivityType} ActivityCreatedBy: {recordSiebel.ActivityCreatedBy} ActivityDescription: {recordSiebel.ActivityDescription}");
+                Console.WriteLine($@"Record# {count} PersonID: {recordSiebel.PersonID} ActivityCreatedDate: {recordSiebel.ActivityCreatedDate} ");
                 if (recordSiebel.ActivityDescription != "")
                 {
                     Console.WriteLine("\n\n\n");
@@ -92,6 +92,7 @@ namespace ConsoleApp_ParseData.Helpers
 
             return _siebelCallNotes.Where(note => note.PersonID == personID).ToList();
         }
+
     }
 }
 

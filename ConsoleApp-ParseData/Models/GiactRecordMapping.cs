@@ -15,8 +15,15 @@ namespace ConsoleApp_ParseData.Models
         public string? City;
         public string? State;
         public string? ZipCode;
-        public string? Country;
-        public string? ItemReferenceID;
-        public string? CreatedDate;
+        public string? AddressCurrentPast;
+        public string? CityCurrentPast;
+        public string? StateCurrentPast;
+        public string? ZipCodeCurrentPast;
+        public string? Status;
+        public string? Classification;
+        public string? NumberType;
+        public string? PhoneNumber;
+
+
     }
 }
