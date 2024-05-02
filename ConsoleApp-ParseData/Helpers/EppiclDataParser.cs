@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ConsoleApp_ParseData.Helpers
 {
-    internal class EppicDataParser
+    public class EppicDataParser
     {
         private int _countofRecords = 0;
         public List<EppicRecords>? eppicRecordsList;

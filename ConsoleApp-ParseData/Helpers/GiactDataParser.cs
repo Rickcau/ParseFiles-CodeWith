@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ConsoleApp_ParseData.Helpers
 {
-    internal class GiactDataParser
+    public class GiactDataParser
     {
         private int _countofRecords = 0;
         public List<GiactRecords>? giactRecordsList;
@@ -29,7 +29,7 @@ namespace ConsoleApp_ParseData.Helpers
 
         public List<GiactRecords> ParseCsv()
         {
-            return giactRecordsList ?? new List<GiactRecords>() ;
+            return giactRecordsList ?? new List<GiactRecords>();
         }
         public void PrintGiactRecords(List<GiactRecords> recordsGiact)  // Used for debugging purposes
         {
@@ -41,7 +41,7 @@ namespace ConsoleApp_ParseData.Helpers
             }
         }
 
-        public GiactRecords? FindGiactUniqueID(string uniqueid, List<GiactRecords> giactrecords)  
+        public GiactRecords? FindGiactUniqueID(string uniqueid, List<GiactRecords> giactrecords)
         {
             return giactrecords.FirstOrDefault(record => record.UniqueID == uniqueid);
         }
@@ -54,6 +54,15 @@ namespace ConsoleApp_ParseData.Helpers
         public GiactRecords? FindGiactByAddressCurrentPast(string addresscurrentpast, List<GiactRecords> giactrecords)
         {
             return giactrecords.FirstOrDefault(record => record.AddressCurrentPast == addresscurrentpast);
+        }
+
+        public GiactRecords? FindGiactByFullAddress(string addressline1, string city, string state, string zipcode, List<GiactRecords> giactrecords)
+        { // Eppic Address1, Address2, CITY, STATE, ZIP
+           return giactrecords.FirstOrDefault(record =>
+                    record.AddressLine1 == addressline1 &&
+                    record.City == city &&
+                    record.State == state &&
+                    record.ZipCode == zipcode);
         }
 
     }

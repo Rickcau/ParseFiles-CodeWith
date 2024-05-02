@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ConsoleApp_ParseData.Helpers
 {
-    internal class SiebelDataParser
+    public class SiebelDataParser
     {
         private List<SiebelCallNotes>? _siebelCallNotes;
         public List<SiebelRecords>? siebelRecordsList;
