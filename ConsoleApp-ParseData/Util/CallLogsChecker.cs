@@ -123,7 +123,7 @@ namespace ConsoleApp_ParseData.Util
             {
                 // KernelArguments arguments = new(new OpenAIPromptExecutionSettings { ResponseFormat = "json_object" }) { { "query", query } };
                 var response = await kernel.InvokePromptAsync(_promptActionConclusion, arguments2);
-                result = response.GetValue<string>() ?? "";
+                result = response.ToString() ?? "";
             }
             catch (Exception ex)
             {

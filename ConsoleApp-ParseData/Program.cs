@@ -29,81 +29,111 @@ var kernel = builder.Build();
 
 #endregion
 
-#region Semantic Kernel Example Parsing of CallNotes
-// Lets get the callnotes for PersonID
-Console.WriteLine("Checking for Fraud Conclusion using AI NOT using JSON mode!!");
+#region Load Data Files
+var _blobConnection = ConfigurationManager.AppSettings.Get("AzureOpenAIModel");
+BlobHelper blobHelper = new BlobHelper();
+blobHelper = new BlobHelper()
+{
+    Container = "eppic",
+    ConnectionString = _blobConnection
+};
 var siebeldataParser = new SiebelDataParser();
-CallLogChecker callLogChecker = new CallLogChecker();
-siebeldataParser.ParseCsv("C:\\temp\\Data\\Siebel\\Siebel.20231107.CSV");
+// Use below to load from file local disk
+// Load Siebel data
+using (StreamReader stream = File.OpenText(@"C:\temp\Data\Siebel\Siebel.20231107.CSV"))
+{
+    siebeldataParser.LoadData(stream);
+}
+// Load GIACT data
+var giactdataParser = new GiactDataParser();
+using (StreamReader stream = File.OpenText(@"C:\temp\Data\Giact\GIACT202131107.CSV"))
+{
+    giactdataParser.LoadData(stream);
+}
+// Load EPPIC data
+var eppicdataParser = new EppicDataParser();
+using (StreamReader stream = File.OpenText(@"C:\temp\Data\Eppic\EPPIC.20231107.CSV"))
+{
+    eppicdataParser.LoadData(stream);
+}
+// Load Hospital data
+var hospitaldataParser = new HospitalShelterDataParser();
+using (StreamReader stream = File.OpenText(@"C:\temp\Data\Hospitals\Hospital-Shelters.20231107.csv"))
+{
+    hospitaldataParser.LoadData(stream);
+}
+
+// Use below to load from Azure Blob Storage note how this uses the Blob Helper
+//using (StreamReader stream = await blobHelper.GetStreamReaderFromBlob("scrubbedSampleSiebel.csv"))
+//{
+//    parser.LoadData(stream);
+//}
+
+//var output = parser.ParseCsv();
+//parser.PrintSiebelRecords(output);
+// Parse and set records to Globals 
+var hospitaldataRecords = hospitaldataParser.ParseCsv();
+var eppicdataRecords = eppicdataParser.ParseCsv();
+var siebeldataRecords = siebeldataParser.ParseCsv();
+var giactdataRecords = giactdataParser.ParseCsv();
+Globals.hospitalRecords = hospitaldataRecords;
+Globals.eppicRecords = eppicdataRecords;
+Globals.siebelRecords = siebeldataRecords;
+Globals.giactRecords = giactdataRecords;
+DataHelper.Step1_BuildEppicListWithMatchesInHospital();  // Build the list of Eppic Records that have an Address Match in Hospital DB
+DataHelper.Step1_BuildEppicListWithoutInAgainstHospital(); // Build the list of Eppic Records that do not have an Address Match in Hospital DB, this need to be processed by Step 2.
+// The records can be accessed for processing as such:
+var test = Globals.inputEppicRecordsInHospitalDB?.Count();
+var test2 = Globals.inputEppicRecordsNotInHospitalDB?.Count();
+#endregion
+
+#region Print Hospital Data, FindHospitalByFullAddress
+Console.WriteLine("\n\n Let's play with the Hospital Shelter File using HospitalShelterData Parser!");
+var recordswithFullAddress = hospitaldataParser.FindHospitalByFullAddress("799 47dH bd", "", "SAN DIEGO", "CA", hospitaldataRecords);
+Console.WriteLine(recordswithFullAddress?.AddressLine1);
+hospitaldataParser.PrintHospitalRecords(hospitaldataRecords);
+#endregion
+
+#region Print Epic Data, FindEppicPersonID 
+Console.WriteLine("\n\n Let's play with the Eppic Data using Eppic Data Parser!");
+var recordswithPersonID = eppicdataParser.FindEppicPersonID("5094334",eppicdataRecords);
+Console.WriteLine(recordswithPersonID?.AddressLine1);
+eppicdataParser.PrintEppicRecords(eppicdataRecords);
+#endregion
+
+#region Print Siebel Data using SiebelDataParser Class
+Console.WriteLine("\n\n Let's play with the Siebel data using SiebelDataParser");
 var recordswithCallNotes = siebeldataParser.FindAllSiebelCallNotesByPersonID("5094334");
-var result = await callLogChecker.CheckFraudIntent2Async(kernel, "5094334", recordswithCallNotes.First().CallNotes ?? "");
-Console.WriteLine(result);
-Console.WriteLine("\n Let's now call CheckFraudIntenAsync which is using JSON Mode");
-var result2 = await callLogChecker.CheckFraudIntentAsync(kernel, "5094334", recordswithCallNotes.First().CallNotes ?? "");
-Console.WriteLine(result2);
-Console.WriteLine("\n");
-// Let's check the ActionConclusion for the CallNotes
-Console.WriteLine("\n Let's now call CheckActionConclusionAsync which is using JSON Mode");
-var result3 = await callLogChecker.CheckActionConclusionAsync(kernel, "5094334", recordswithCallNotes.First().CallNotes ?? "");
-Console.WriteLine(result3);
-Console.WriteLine("\n");
-
-// siebeldataParser.PrintSiebelCallNoteRecords(recordswithCallNotes);
-
-#endregion
-#region Parse Epic File Example
-// Parse Epic example
-
-//Console.WriteLine("Let's read the Epicc File\n");
-
-//var engineEpicc = new FileHelperEngine<EpiccRecords>();
-//var recordsEpicc = engineEpicc.ReadFile("C:\\temp\\Data\\Epicc\\EPPIC.20231107.CSV");
-//var count1 = 0;
-//foreach (var recordEpicc in recordsEpicc)
-//{
-//    count1++;
-//    Console.WriteLine($@"Record# {count1} UniqueID: {recordEpicc.UniqueID} AddressLine1: {recordEpicc.AddressLine1} AddressLine2: {recordEpicc.AddressLine2} City: {recordEpicc.City} State: {recordEpicc.State} ZipCode: {recordEpicc.ZipCode}");
-//}
-//Console.WriteLine("\n\n");
+Console.WriteLine(recordswithCallNotes?.FirstOrDefault()?.CallNotes);
+siebeldataParser.PrintSiebelRecords(siebeldataRecords);
 #endregion
 
-#region Parse Siebel Example using SiebelDataParser Class
-// Let's get the callnotes for PersonID 5094334
-var siebeldataParser2 = new SiebelDataParser();
-siebeldataParser2.ParseCsv("C:\\temp\\Data\\Siebel\\Siebel.20231107.CSV");
-var recordswithCallNotes2 = siebeldataParser.FindAllSiebelCallNotesByPersonID("5094334");
-Console.WriteLine(result);
+#region Print GIACT Data example using Giact Data Parser
+Console.WriteLine("\n\n Let's play with the Giact file using GiactDataParser");
+var recordswithUniqueID = giactdataParser.FindGiactUniqueID("5094334",giactdataRecords);
+Console.WriteLine(recordswithUniqueID?.AddressLine1);
+giactdataParser.PrintGiactRecords(giactdataRecords);
 #endregion
 
+#region Semantic Kernel Example Parsing of All CallNotes
+// Lets Run the AI code on all the siebel records just to check how to dealt with the ActivityDescription (Call Notes)
+Console.WriteLine("Checking for Fraud Conclusion using AI ");
+CallLogChecker callLogChecker = new CallLogChecker();
 
-//Console.WriteLine("Let's read the Siebel File\n");
+var fraudIntentResult = "";
+foreach (var recordSiebel in siebeldataRecords)
+{
+    fraudIntentResult = await callLogChecker.CheckFraudIntentAsync(kernel, recordSiebel.PersonID ?? "", recordSiebel.ActivityDescription ?? "");
+    Console.WriteLine($@"# Fraud Conslusion Result # PersonID: {recordSiebel.PersonID}");
+    Console.WriteLine($@"{fraudIntentResult}\n");
+}
 
-//var engineSiebel = new FileHelperEngine<SiebelRecords>();
-//var recordsSiebel = engineSiebel.ReadFile("C:\\temp\\Data\\Siebel\\NOV7_activity_v2.csv");
-//var count2 = 0;
-//foreach (var recordSiebel in recordsSiebel)
-//{
-//    count2++;
-//    Console.WriteLine($@"Record# {count2} ProgramName: {recordSiebel.ProgramName} PersonID: {recordSiebel.PersonID} ContactFirstName: {recordSiebel.ContactFirstName} ContactLastName: {recordSiebel.ContactLastName} ActivityCreatedDate: {recordSiebel.ActivityCreatedDate} ActivityType: {recordSiebel.ActivityType} ActivityCreatedBy: {recordSiebel.ActivityCreatedBy} ActivityDescription: {recordSiebel.ActivityDescription}");
-//    if (recordSiebel.ActivityDescription != "")
-//    {
-//        Console.WriteLine("\n\n\n");
-//        Console.WriteLine("Activity Description has data!!!");
-//        Console.WriteLine("***************************");
-//        Console.WriteLine(recordSiebel.ActivityDescription);
-//        Console.WriteLine("***************************\n\n");
-//    }
-//}
-
-#region Parse GIACT file example
-//Console.WriteLine("\n\n");
-//Console.WriteLine("Let's read the Giact File\n");
-
-//var engineGiact = new FileHelperEngine<GiactRecords>();
-//var recordsGiact = engineGiact.ReadFile("C:\\temp\\Data\\Giact\\GIACT202131107.CSV");
-
-//foreach (var recordGiact in recordsGiact)
-//{
-//    Console.WriteLine($@"UniqueID: { recordGiact.UniqueID} City: {recordGiact.City} State: {recordGiact.City} ZipCode: {recordGiact.ZipCode} AddressLine1: {recordGiact.AddressLine1}");
-//}
+Console.WriteLine("Checking all recrods for Action Conclusion using AI ");
+var actionConclusionResult = "";
+foreach (var recordSiebel in siebeldataRecords)
+{
+    actionConclusionResult = await callLogChecker.CheckActionConclusionAsync(kernel, recordSiebel.PersonID ?? "", recordSiebel.ActivityDescription ?? "");
+    Console.WriteLine($@"# Fraud Conslusion Result # PersonID: {recordSiebel.PersonID}");
+    Console.WriteLine($@"{actionConclusionResult}\n");
+}
 #endregion
