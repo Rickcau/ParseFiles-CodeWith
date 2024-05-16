@@ -10,5 +10,7 @@ namespace ConsoleApp_ParseData.Models
     {
         public string? PersonID { get; set; }
         public string? CallNotes { get; set; }
+        public DateTime? ActivityCreatedDate { get; set; }
     }
+
 }

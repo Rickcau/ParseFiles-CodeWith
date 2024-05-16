@@ -77,7 +77,7 @@ namespace ConsoleApp_ParseData.Util
 
         public async Task<string> CheckFraudIntentAsync(Kernel kernel, string personid, string query)
         {
-#pragma warning disable SKEXP0010
+        #pragma warning disable SKEXP0010
 
             var executionSettings = new OpenAIPromptExecutionSettings()
             {

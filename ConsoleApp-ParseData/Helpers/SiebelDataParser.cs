@@ -107,6 +107,16 @@ namespace ConsoleApp_ParseData.Helpers
             return _siebelCallNotes.Where(note => note.PersonID == personID).ToList();
         }
 
+        public List<SiebelCallNotes> FindAllSiebelCallNotesByPersonIDLastFirst(string personID)
+        {
+            if (_siebelCallNotes == null)
+                return new List<SiebelCallNotes>(); // If _siebelCallNotes is null, return an empty list
+
+            return _siebelCallNotes.Where(note => note.PersonID == personID)
+                .OrderByDescending(note => note.ActivityCreatedDate)
+                .ToList();
+        }
+
     }
 }
 
